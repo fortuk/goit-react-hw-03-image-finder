@@ -5,7 +5,7 @@ import s from './Modal.module.css';
 
 const modalRoot = document.querySelector('#modal-root');
 
-class Modal extends React.Component {
+export default class Modal extends React.Component {
   componentDidMount() {
     window.addEventListener('keydown', this.onEscClick);
   }
@@ -43,5 +43,3 @@ class Modal extends React.Component {
 Modal.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
-
-export { Modal };

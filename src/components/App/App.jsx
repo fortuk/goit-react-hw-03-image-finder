@@ -1,12 +1,13 @@
 import React from 'react';
 import 'react-toastify/dist/ReactToastify.css';
-import { Searchbar } from '../SearchBar/Searchbar';
-import { ImageGallery } from '../ImageGallery/ImageGallery';
+import Searchbar from '../SearchBar/Searchbar';
+import ImageGallery from '../ImageGallery/ImageGallery';
 import imagesApi from '../../api/imagesApi';
 import Button from '../Button/Button';
 import Loader from 'react-loader-spinner';
 import Modal from '../Modal/Modal';
 import s from './App.module.css';
+
 export default class App extends React.Component {
   state = {
     searchQuery: '',
