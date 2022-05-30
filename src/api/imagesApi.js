@@ -1,21 +1,12 @@
 import axios from 'axios';
-const getImages = axios.create({
-  baseURL: 'https://pixabay.com/api/',
-  params: {
-    key: '21917533-94fc46511cdba7fd05c8e408d',
-    image_type: 'photo',
-    orientation: 'horizontal',
-  },
-});
+axios.defaults.baseURL = 'https://pixabay.com/api';
+const apiKey = '16763452-f17d9c1e6c077c804b5291364';
 
-async function imagesApi(q = '', page = 1, per_page = 12) {
-  const params = { q, page, per_page };
-  try {
-    const { data } = await getImages('', { params });
-    return data;
-  } catch (error) {
-    console.error(`No results found for ${q}'`);
-  }
-}
+const fetchImagesWithQuery = async (searchQuery, page = 1) => {
+  const response = await axios(
+    `/?q=${searchQuery}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`,
+  );
+  return response.data.hits;
+};
 
-export default imagesApi;
+export default { fetchImagesWithQuery };

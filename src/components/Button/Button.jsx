@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import s from './Button.module.css';
 
-function Button({ onClick }) {
+export default function Button({ onClick }) {
   return (
     <button type="button" className={s.Button} onClick={onClick}>
       Load more
@@ -11,7 +11,5 @@ function Button({ onClick }) {
 }
 
 Button.propTypes = {
-  loadMoreBtn: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
 };
-
-export { Button };
