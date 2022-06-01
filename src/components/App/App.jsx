@@ -46,24 +46,28 @@ export default class App extends React.Component {
     imagesApi
       .fetchImagesWithQuery(searchQuery, page)
       .then(images => {
-        this.setState(prevState => ({
-          results: [...prevState.results, ...images],
-          page: prevState.page + 1,
-        }));
-        if (!this.state.firstFetch) {
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth',
-          });
+        if (images.length < 1) {
+          this.setState({ error: true });
+        } else {
+          this.setState(prevState => ({
+            images: [...prevState.images, ...images],
+            page: prevState.page + 1,
+            error: false,
+          }));
+          if (page !== 1) {
+            this.scrollToBottom();
+          }
         }
       })
-      .catch(error => console.log(error))
-      .finally(() => {
-        this.setState({
-          loading: false,
-          firstFetch: false,
-        });
-      });
+      .catch(error => this.setState({ error }))
+      .finally(() => this.setState({ loading: false }));
+  };
+
+  scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
   openModal = imageUrl => {
