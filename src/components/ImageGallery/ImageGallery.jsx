@@ -1,4 +1,3 @@
-import React from 'react';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import s from './ImageGallery.module.css';

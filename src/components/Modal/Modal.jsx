@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import s from './Modal.module.css';
 
-export default class Modal extends React.Component {
+export default class Modal extends Component {
   componentDidMount() {
     window.addEventListener('keydown', this.onEscClick);
   }
