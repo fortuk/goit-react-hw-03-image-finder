@@ -2,20 +2,11 @@ import React, { Component } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from '../SearchBar/Searchbar';
 import ImageGallery from '../ImageGallery/ImageGallery';
-import { fetchImagesWithQuery } from '../../api/imagesApi';
+import imagesApi from '../../api/imagesApi';
 import Button from '../Button/Button';
-import Loader from 'react-loader-spinner';
 import Modal from '../Modal/Modal';
-import s from './App.module.css';
-import { toast } from 'react-toastify';
 import { Load } from '../loader/loader';
-
-function scrollPageDown() {
-  window.scrollTo({
-    top: document.documentElement.scrollHeight,
-    behavior: 'smooth',
-  });
-}
+import s from '../App/App.module.css';
 
 export default class App extends Component {
   state = {
@@ -23,70 +14,86 @@ export default class App extends Component {
     images: [],
     searchRequest: '',
     loading: false,
-    error: '',
+    error: null,
     page: 1,
     largeImageSrc: '',
     alt: '',
+    status: 'idle',
+    modalImg: '',
+    modalAlt: '',
   };
 
-  componentDidMount() {
-    this.getData(this.state.searchRequest, this.state.page);
-  }
+  componentDidUpdate(_, prevState) {
+    const prevQuery = prevState.searchRequest;
+    const nextQuery = this.state.searchRequest;
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchRequest !== this.state.searchRequest) {
-      this.setState({ images: [] });
+    const prevPage = prevState.page;
+    const nextPage = this.state.page;
+
+    if (nextPage > 1) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+
+    if (prevQuery !== nextQuery) {
+      this.setState({ images: [], status: 'pending' });
+    }
+
+    if (prevQuery !== nextQuery || prevPage !== nextPage) {
+      imagesApi
+        .fetchImagesWithQuery(nextQuery, nextPage)
+        .then(({ hits }) => {
+          const images = hits.map(
+            ({ id, webformatURL, largeImageURL, tags }) => {
+              return { id, webformatURL, largeImageURL, tags };
+            },
+          );
+          if (images.length > 0) {
+            this.setState(prevState => {
+              return {
+                images: [...prevState.images, ...images],
+                status: 'resolved',
+              };
+            });
+          } else {
+            alert(`По запросу ${nextQuery} ничего не найдено.`);
+            this.setState({ status: 'idle' });
+          }
+        })
+        .catch(error => this.setState({ error, status: 'rejected' }));
     }
   }
 
-  getData = (request, page) => {
-    fetchImagesWithQuery(request, page)
-      .then(response => {
-        if (response.status === 200 && this.state.searchRequest.trim().length) {
-          this.setState({
-            images: [...this.state.images, ...response.data.hits],
-          });
-
-          if (this.state.images.length === 0) {
-            toast.error('По вашему запросу - НИЧЕГО НЕ НАЙДЕНО!');
-          }
-          scrollPageDown();
-        }
-        if (response.status === 404) {
-          throw new Error(response.message || 'pictures not exist');
-        }
-      })
-      .catch(function (error) {
-        console.error('error', error);
-      })
-      .then(() => {
-        this.setState({ loading: false });
-      });
-  };
-
   handleSearchbarSubmit = request => {
-    this.setState({ loading: true });
-    this.setState({ searchRequest: request });
-    this.getData(request, this.state.page);
+    if (request !== this.state.searchRequest) {
+      this.setState({ searchRequest: request, page: 1, status: 'pending' });
+    }
   };
+
   fetchImages = () => {
-    this.setState({ page: this.state.page + 1 });
-    this.getData(this.state.searchRequest, this.state.page + 1);
-    this.setState({ loading: true });
+    this.setState(({ page }) => {
+      return { page: page + 1, status: 'pending' };
+    });
 
     return;
   };
 
   toggleModal = () => {
-    this.setState({ showModal: !this.state.showModal });
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
   };
 
-  setCurrentPictureSrc = e => {
-    this.setState({ showModal: !this.state.showModal });
-    if (e !== undefined) {
-      this.setState({ largeImageSrc: e.target.dataset.largeimage });
-      this.setState({ alt: e.target.alt });
-    }
+  setCurrentPictureSrc = event => {
+    const imgForModal = event.target.dataset.src;
+    const altForModal = event.target.alt;
+    this.setState({
+      showModal: true,
+      modalImg: imgForModal,
+      modalAlt: altForModal,
+    });
   };
 
   render() {

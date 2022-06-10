@@ -19,8 +19,6 @@ export default class Searchbar extends Component {
       toast.error('Ввдите данные в строку поиска');
       return;
     }
-    this.setState({ searchRequest: '' });
-
     this.props.onSubmit(this.state.searchRequest);
   };
 
